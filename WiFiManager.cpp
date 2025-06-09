@@ -1890,6 +1890,33 @@ void WiFiManager::handleWifiSave() {
 
   if(_paramsInWifi) doParamSave();
 
+  bool validationFailed = false;
+  String errorMessage = "";
+
+  for (int i = 0; i < _paramsCount; i++) 
+  {
+    if (_params[i] == NULL) continue;
+
+    // execute validation
+    String validationError = _params[i]->validate();
+    if (validationError.length() > 0) {
+        validationFailed = true;
+        errorMessage += "-" + String(_params[i]->getLabel()) + ": " + validationError + "<br/>";
+        continue;
+    }
+  }
+
+  if(validationFailed) 
+  {
+    String page = getHTTPHead(FPSTR(S_titleinfo));
+    page += "<h2>Error de parametros</h2>";
+    page += "<div class='msg D'>" + errorMessage + "</div>";
+    page += FPSTR(HTTP_BACKBTN);
+    page += getHTTPEnd();
+    HTTPSend(page);
+    return;
+  }
+
   String page;
 
   if(_ssid == ""){

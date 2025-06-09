@@ -219,7 +219,22 @@ class WiFiManagerParameter {
     virtual const char *getCustomHTML() const;
     void        setValue(const char *defaultValue, int length);
 
+    typedef std::function<String(const char*)> ValidationFunction;
+    
+    void setValidation(ValidationFunction validationFn) {
+        _validation = validationFn;
+    }
+    
+    String validate() const {
+        if (_validation) {
+            return _validation(_value);
+        }
+        return ""; // empty string means validation passed
+    }
+
   protected:
+    ValidationFunction _validation = nullptr;
+    
     void init(const char *id, const char *label, const char *defaultValue, int length, const char *custom, int labelPlacement);
 
     WiFiManagerParameter& operator=(const WiFiManagerParameter&);
